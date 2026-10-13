@@ -1,15 +1,19 @@
 /* C-TEST DEUTSCH - Modern Stylesheet */
+
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 :root {
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
+
 body {
   font-family: var(--font-sans);
   background-color: #0b0f19;
   color: #f1f5f9;
   overflow-x: hidden;
 }
+
 /* Glassmorphism Cards */
 .glass-panel {
   background: rgba(17, 24, 39, 0.75);
@@ -17,11 +21,13 @@ body {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
 .glass-panel-subtle {
   background: rgba(31, 41, 55, 0.5);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
+
 /* C-Test Text Passage Typography */
 .ctest-passage {
   font-size: 1.125rem;
@@ -29,12 +35,14 @@ body {
   word-spacing: 0.15em;
   letter-spacing: -0.01em;
 }
+
 @media (max-width: 640px) {
   .ctest-passage {
     font-size: 1rem;
     line-height: 2.0;
   }
 }
+
 /* C-Test Gap Input Styling */
 .gap-wrapper {
   display: inline-flex;
@@ -44,6 +52,161 @@ body {
   vertical-align: baseline;
   position: relative;
 }
+
 .gap-prefix {
   font-weight: 700;
   color: #e2e8f0;
+  letter-spacing: 0.02em;
+}
+
+.gap-input {
+  /* Полностью отключаем нативный стиль браузера (Safari/Chrome) */
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  -webkit-text-fill-color: #7dd3fc !important; /* для Safari, чтобы текст точно отображался */
+
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1em;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+
+  /* Темный, ненавязчивый фон */
+  color: #7dd3fc !important;
+  background-color: rgba(12, 30, 55, 0.85) !important;
+
+  /* Мягкая рамка + акцентное подчёркивание */
+  border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
+  border-bottom: 2.5px solid rgba(56, 189, 248, 0.8) !important;
+  border-radius: 5px;
+
+  padding: 1px 5px 2px 5px !important;
+  margin: 0 1px;
+  text-align: center;
+  vertical-align: baseline;
+
+  outline: none !important;
+  box-shadow: none !important;
+  transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  caret-color: #38bdf8;
+
+  /* Убираем авто-заливку от менеджеров паролей */
+  -webkit-box-shadow: none !important;
+}
+
+/* Заглушки-точки ещё до ввода */
+.gap-input::placeholder {
+  color: rgba(148, 163, 184, 0.4) !important;
+  -webkit-text-fill-color: rgba(148, 163, 184, 0.4) !important;
+  letter-spacing: 0.05em;
+}
+
+/* Активное поле ввода */
+.gap-input:focus {
+  background-color: rgba(7, 20, 40, 0.95) !important;
+  border-color: rgba(56, 189, 248, 0.9) !important;
+  border-bottom: 2.5px solid #38bdf8 !important;
+  box-shadow: 0 0 0 2.5px rgba(56, 189, 248, 0.2) !important;
+  color: #e0f2fe !important;
+  -webkit-text-fill-color: #e0f2fe !important;
+}
+
+/* Заполненное поле */
+.gap-input.gap-filled {
+  background-color: rgba(14, 35, 65, 0.9) !important;
+  border-color: rgba(56, 189, 248, 0.55) !important;
+  border-bottom: 2.5px solid #38bdf8 !important;
+  color: #7dd3fc !important;
+  -webkit-text-fill-color: #7dd3fc !important;
+}
+
+/* Evaluation States in Review */
+.gap-correct {
+  color: #34d399 !important;
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  border-color: #10b981 !important;
+}
+
+.gap-wrong {
+  color: #f87171 !important;
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  border-color: #ef4444 !important;
+  text-decoration: line-through;
+}
+
+.gap-missed {
+  color: #fbbf24 !important;
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  border-color: #f59e0b !important;
+}
+
+/* Pulse animation for timer urgency */
+@keyframes timerPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 15px 4px rgba(239, 68, 68, 0.3);
+  }
+}
+
+.timer-urgent {
+  animation: timerPulse 1s infinite ease-in-out;
+  color: #f87171 !important;
+  border-color: #ef4444 !important;
+}
+
+/* German Special Keys Ribbon */
+.umlaut-btn {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  transition: all 0.1s ease;
+  user-select: none;
+}
+
+.umlaut-btn:active {
+  transform: scale(0.92);
+}
+
+/* Tooltip & Badges */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Print & PDF Export styles */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
