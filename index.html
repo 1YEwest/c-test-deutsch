@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C-Test Deutsch – Симулятор экзамена и аналитика знаний</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts & Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- html2pdf.js for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 text-white font-black text-xl tracking-tighter">
+          C
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">C-Test Deutsch</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">PRO</span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">Симулятор OnSET, Studienkolleg & TestDaF с ИИ-аналитикой</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none">
+        <button data-tab-target="exam" class="px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center gap-2 transition">
+          <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+          <span>Экзамен (8 текстов)</span>
+        </button>
+        <button data-tab-target="practice" class="px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 flex items-center gap-2 transition">
+          <i data-lucide="target" class="w-4 h-4"></i>
+          <span>Тренировка</span>
+        </button>
+        <button data-tab-target="generator" class="px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 flex items-center gap-2 transition">
+          <i data-lucide="pen-tool" class="w-4 h-4"></i>
+          <span>Свой текст</span>
+        </button>
+        <button data-tab-target="results" class="px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 flex items-center gap-2 transition">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>Аналитика</span>
+        </button>
+        <button data-tab-target="history" class="px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 flex items-center gap-2 transition">
+          <i data-lucide="history" class="w-4 h-4"></i>
+          <span>История</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
+
+    <!-- German Umlaut Quick Keys (Sticky / Available everywhere) -->
+    <div class="glass-panel p-2.5 rounded-xl mb-6 flex flex-wrap items-center justify-between gap-3 shadow-md">
+      <div class="flex items-center gap-2 text-xs text-slate-400">
+        <i data-lucide="keyboard" class="w-4 h-4 text-sky-400"></i>
+        <span class="hidden sm:inline">Немецкие буквы для быстрого ввода:</span>
+        <span class="sm:hidden">Спецсимволы:</span>
+      </div>
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <button type="button" data-char="ä" class="umlaut-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-sky-600/30 text-sky-300 font-mono text-sm border border-slate-700 hover:border-sky-500 transition">ä</button>
+        <button type="button" data-char="ö" class="umlaut-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-sky-600/30 text-sky-300 font-mono text-sm border border-slate-700 hover:border-sky-500 transition">ö</button>
+        <button type="button" data-char="ü" class="umlaut-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-sky-600/30 text-sky-300 font-mono text-sm border border-slate-700 hover:border-sky-500 transition">ü</button>
+        <button type="button" data-char="ß" class="umlaut-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-sky-600/30 text-sky-300 font-mono text-sm border border-slate-700 hover:border-sky-500 transition">ß</button>
+        <button type="button" data-char="Ä" class="umlaut-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-sky-600/30 text-slate-300 font-mono text-sm border border-slate-700 hover:border-sky-500 transition">Ä</button>
+        <button type="button" data-char="Ö" class="umlaut-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-sky-600/30 text-slate-300 font-mono text-sm border border-slate-700 hover:border-sky-500 transition">Ö</button>
+        <button type="button" data-char="Ü" class="umlaut-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-sky-600/30 text-slate-300 font-mono text-sm border border-slate-700 hover:border-sky-500 transition">Ü</button>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: EXAM MODE (8 TEXTS x 5 MINUTES)                            -->
+    <!-- ================================================================= -->
+    <section id="tab-exam" class="tab-content">
+      <!-- Welcome Screen -->
+      <div id="exam-welcome-card" class="glass-panel p-8 sm:p-10 rounded-2xl border border-slate-800 shadow-2xl">
+        <div class="max-w-2xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 text-xs font-semibold mb-4">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Официальный стандарт OnSET & Studienkolleg
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
+            Симуляция экзамена C-Test
+          </h2>
+          <p class="text-slate-300 text-base leading-relaxed mb-6">
+            Вам предстоит пройти классический академический C-Test из <strong>8 текстов</strong>.
+            По регламенту на каждый текст отводится ровно <strong>5 минут</strong>. Каждые 5 минут тест автоматически переключается на следующий текст.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+              <div class="text-sky-400 font-bold text-xl mb-1 flex items-center gap-2">
+                <i data-lucide="files" class="w-5 h-5"></i> 8 текстов
+              </div>
+              <div class="text-xs text-slate-400">По 20 пропусков в каждом тексте (всего 160)</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+              <div class="text-amber-400 font-bold text-xl mb-1 flex items-center gap-2">
+                <i data-lucide="clock" class="w-5 h-5"></i> 5 минут
+              </div>
+              <div class="text-xs text-slate-400">На каждый текст (автопереключение)</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+              <div class="text-emerald-400 font-bold text-xl mb-1 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-5 h-5"></i> ИИ-отчет
+              </div>
+              <div class="text-xs text-slate-400">Разбор слабых зон и экспорт в PDF</div>
+            </div>
+          </div>
+
+          <!-- Exam Profile Selector -->
+          <div class="mb-6 p-4 rounded-xl bg-slate-900/80 border border-slate-700/60">
+            <label class="block text-xs font-semibold text-sky-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <i data-lucide="sliders" class="w-4 h-4"></i> Выберите профиль сложности экзамена:
+            </label>
+            <select id="exam-profile-select" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 font-medium focus:outline-none focus:border-sky-500">
+              <option value="standard" selected>🎓 Академический (B1 ➔ B2 ➔ C1) — Studienkolleg, OnSET & TestDaF</option>
+              <option value="beginner">🔰 Начальный уровень (A1 ➔ A2 ➔ B1) — Для начинающих и повторения базы</option>
+              <option value="full">⚡ Полный спектр (A1 ➔ C1) — Комплексный срез от базового до продвинутого</option>
+            </select>
+          </div>
+
+          <div class="bg-slate-900/80 rounded-xl p-4 border border-slate-800 mb-8 text-sm text-slate-300 space-y-2">
+            <div class="font-semibold text-slate-200 flex items-center gap-2">
+              <i data-lucide="info" class="w-4 h-4 text-sky-400"></i> Правило заполнения C-Test:
+            </div>
+            <p class="text-xs text-slate-400 leading-normal">
+              Первое предложение всегда нетронуто. Начиная со 2-го предложения, у каждого второго слова стерта вторая половина.
+              Введите только недостающие буквы. Точки в поле соответствуют количеству недостающих символов!
+            </p>
+          </div>
+
+          <button id="btn-start-exam" class="px-8 py-4 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-base shadow-xl shadow-sky-500/25 transition transform hover:-translate-y-0.5 flex items-center gap-3">
+            <span>Начать экзамен прямо сейчас</span>
+            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Exam Screen -->
+      <div id="exam-active-card" class="hidden space-y-6">
+        <!-- Exam Header Bar -->
+        <div class="glass-panel p-4 sm:p-5 rounded-2xl border border-slate-800">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 id="exam-current-title" class="text-xl font-bold text-white">Текст 1 из 8</h3>
+                <span id="exam-current-theme" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">B1 • Alltag</span>
+              </div>
+              <div class="text-xs text-slate-400 mt-1" id="exam-filled-count">0 / 20 заполнено</div>
+            </div>
+
+            <!-- Per-Text Timer Display -->
+            <div class="flex items-center gap-3">
+              <div class="text-right">
+                <div class="text-xs text-slate-400 font-medium">Таймер этого текста:</div>
+                <div id="exam-timer-display" class="font-mono text-2xl font-black text-sky-400 tracking-wider">05:00</div>
+              </div>
+              <button id="btn-exam-pause" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Пауза">
+                <i data-lucide="pause" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Per-Text Progress Countdown Bar -->
+          <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mb-4">
+            <div id="exam-timer-bar" class="h-full bg-sky-500 transition-all duration-300" style="width: 100%;"></div>
+          </div>
+
+          <!-- Text Pills Selector (1 to 8) -->
+          <div class="flex items-center justify-between gap-2 overflow-x-auto pb-1">
+            <div id="exam-texts-pills" class="flex items-center gap-2">
+              <!-- Dynamically rendered -->
+            </div>
+            <div id="exam-total-timer-display" class="text-xs font-mono text-slate-400 shrink-0 hidden sm:block">
+              Всего: 40:00
+            </div>
+          </div>
+        </div>
+
+        <!-- Passage Container -->
+        <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800">
+          <div id="exam-passage-container" class="ctest-passage text-slate-200">
+            <!-- Dynamically rendered C-Test passage with inputs -->
+          </div>
+        </div>
+
+        <!-- Exam Action Controls -->
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <button id="btn-exam-prev" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm border border-slate-700 transition flex items-center gap-2">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i> Предыдущий текст
+          </button>
+          <div class="flex items-center gap-3">
+            <button id="btn-exam-finish" class="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-sm font-semibold transition">
+              Завершить досрочно
+            </button>
+            <button id="btn-exam-next" class="px-6 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-sm shadow-lg shadow-sky-500/20 transition flex items-center gap-2">
+              Следующий текст <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: PRACTICE MODE (CHOOSE DIFFICULTY & INDIVIDUAL TEXTS)       -->
+    <!-- ================================================================= -->
+    <section id="tab-practice" class="tab-content hidden space-y-6">
+      <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <i data-lucide="target" class="w-5 h-5 text-sky-400"></i> Тренировочный режим по уровням сложности
+        </h3>
+
+        <!-- Controls Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Уровень сложности:</label>
+            <select id="practice-level-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+              <option value="all">Все уровни (A1 – C1)</option>
+              <option value="A1">Уровень A1 (Anfänger)</option>
+              <option value="A2">Уровень A2 (Grundstufe)</option>
+              <option value="B1">Уровень B1 (Mittelstufe 1)</option>
+              <option value="B2">Уровень B2 (Studienkolleg)</option>
+              <option value="C1">Уровень C1 (TestDaF / DSH)</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Выбор текста из базы:</label>
+            <div class="flex gap-2">
+              <select id="practice-text-select" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                <!-- Dynamically populated -->
+              </select>
+              <button id="btn-practice-random" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-xl border border-slate-700 transition" title="Случайный текст">
+                <i data-lucide="shuffle" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text Title Header -->
+        <div class="border-t border-slate-800/80 pt-4 mb-6 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h4 id="practice-title" class="text-lg font-bold text-slate-100">Загрузка текста...</h4>
+            <p id="practice-theme" class="text-xs text-slate-400">Описание темы</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-practice-hint" class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 text-xs font-semibold flex items-center gap-1.5 transition">
+              <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i> Подсказка
+            </button>
+            <button id="btn-practice-reset" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Очистить
+            </button>
+          </div>
+        </div>
+
+        <!-- Practice Passage -->
+        <div id="practice-passage-container" class="ctest-passage text-slate-200 bg-slate-900/40 p-6 rounded-xl border border-slate-800/60 mb-6">
+          <!-- Text rendered here -->
+        </div>
+
+        <!-- Action & Mini-Result -->
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div id="practice-single-result" class="hidden flex items-center gap-3">
+            <div class="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 flex items-center gap-2">
+              <span class="text-xs text-slate-400">Баллы:</span>
+              <span id="practice-score-text" class="font-bold text-emerald-400 text-sm">18 / 20 (90%)</span>
+            </div>
+            <span id="practice-cefr-badge" class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+              C1 Level
+            </span>
+          </div>
+
+          <button id="btn-practice-check" class="ml-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-sky-500/20 transition flex items-center gap-2">
+            <i data-lucide="check" class="w-4 h-4"></i> Проверить ответы
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: CUSTOM TEXT GENERATOR                                      -->
+    <!-- ================================================================= -->
+    <section id="tab-generator" class="tab-content hidden space-y-6">
+      <!-- 1. Generator nach GER-Niveau (A1 bis C1) -->
+      <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-sky-500/30 bg-sky-950/10 shadow-xl">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-5 h-5 text-sky-400"></i> Генерация C-Test по уровням (от A1 до C1)
+          </h3>
+          <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30">АВТО-ГЕНЕРАТОР</span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-300 mb-6 leading-relaxed">
+          Выберите нужный уровень владения (A1, A2, B1, B2, C1) и тему. Система автоматически сгенерирует аутентичный немецкий текст с соответствующей лексикой и грамматикой, сформировав ровно 20 пропусков по стандарту C-Test.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Уровень (GER/CEFR):</label>
+            <select id="synth-level-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-sky-400 focus:outline-none focus:border-sky-500">
+              <option value="A1">🟢 A1 — Начальный (Anfänger)</option>
+              <option value="A2">🟡 A2 — Базовый (Grundstufe)</option>
+              <option value="B1" selected>🔵 B1 — Средний (Mittelstufe 1)</option>
+              <option value="B2">🟣 B2 — Продвинутый (Studienkolleg)</option>
+              <option value="C1">🔴 C1 — Академический (TestDaF / DSH)</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Тематика текста:</label>
+            <select id="synth-topic-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+              <!-- Dynamically populated based on level -->
+            </select>
+          </div>
+        </div>
+
+        <div id="synth-level-info" class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-400 mb-6">
+          Загрузка информации об уровне...
+        </div>
+
+        <button id="btn-synth-generate" class="w-full sm:w-auto px-7 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-sky-500/20 transition flex items-center justify-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Сгенерировать новый C-Test этого уровня
+        </button>
+      </div>
+
+      <!-- 2. Oder eigener benutzerdefinierter Text -->
+      <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800">
+        <h4 class="text-base font-bold text-slate-200 mb-2 flex items-center gap-2">
+          <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i> Или вставьте свой собственный немецкий текст:
+        </h4>
+        <p class="text-xs text-slate-400 mb-4">
+          Вы можете вставить фрагмент статьи, новости из Deutsche Welle или страницу учебника:
+        </p>
+
+        <div class="space-y-4 mb-6">
+          <div>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Исходный немецкий текст:</label>
+              <button id="btn-custom-sample" class="text-xs text-sky-400 hover:text-sky-300 font-medium underline">Вставить образец текста</button>
+            </div>
+            <textarea id="custom-text-input" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm text-slate-200 focus:outline-none focus:border-sky-500 placeholder-slate-600" placeholder="Вставьте сюда немецкий текст (минимум 2-3 предложения)..."></textarea>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-4">
+            <div>
+              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Количество пропусков:</label>
+              <select id="custom-gaps-count" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                <option value="20" selected>20 пропусков (Стандарт)</option>
+                <option value="15">15 пропусков</option>
+                <option value="10">10 пропусков (Мини-тест)</option>
+                <option value="25">25 пропусков</option>
+              </select>
+            </div>
+
+            <button id="btn-custom-generate" class="mt-auto px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm border border-slate-700 transition flex items-center gap-2">
+              <i data-lucide="wand-2" class="w-4 h-4"></i> Сгенерировать из этого текста
+            </button>
+          </div>
+        </div>
+
+        <!-- Generated Playable Container -->
+        <div id="custom-playable-card" class="hidden border-t border-slate-800 pt-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h4 id="custom-playable-title" class="font-bold text-white text-base">Интерактивный сгенерированный тест</h4>
+              <p id="custom-playable-meta" class="text-xs text-slate-400">Метаданные теста</p>
+            </div>
+            <span class="text-xs text-sky-400 font-mono bg-sky-500/10 px-3 py-1 rounded-full border border-sky-500/20">Готов к прохождению</span>
+          </div>
+
+          <div id="custom-passage-container" class="ctest-passage text-slate-200 bg-slate-900/60 p-6 rounded-xl border border-slate-800">
+            <!-- Passages -->
+          </div>
+
+          <div class="flex justify-end">
+            <button id="btn-custom-check" class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+              <i data-lucide="check-circle" class="w-4 h-4"></i> Проверить и перейти к аналитике
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 4: RESULTS & IN-DEPTH ANALYTICS                               -->
+    <!-- ================================================================= -->
+    <section id="tab-results" class="tab-content hidden space-y-8">
+      <!-- Top Action Bar (PDF & AI) -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl glass-panel border border-slate-800">
+        <div>
+          <span class="text-xs text-slate-400">Диагностический отчет сформирован</span>
+          <div id="res-date" class="text-sm font-semibold text-slate-200">13 октября 2026 г.</div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button id="btn-download-pdf" class="px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-sm font-bold transition flex items-center gap-2">
+            <i data-lucide="file-down" class="w-4 h-4"></i> Скачать PDF отчет
+          </button>
+          <button id="btn-copy-ai-prompt" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-sm shadow-md shadow-sky-500/20 transition flex items-center gap-2">
+            <i data-lucide="bot" class="w-4 h-4"></i> Скопировать промпт для ИИ
+          </button>
+        </div>
+      </div>
+
+      <!-- Hero Scorecard -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 text-center flex flex-col justify-center">
+          <div class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-1">Итоговый балл</div>
+          <div id="res-total-score" class="text-4xl font-black text-sky-400 tracking-tight">-- / --</div>
+          <div id="res-exam-type" class="text-xs text-slate-500 mt-1">Одиночный тест</div>
+        </div>
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 text-center flex flex-col justify-center">
+          <div class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-1">Точность ответов</div>
+          <div id="res-percentage" class="text-4xl font-black text-white tracking-tight">--%</div>
+          <div class="text-xs text-slate-500 mt-1">от общего числа пропусков</div>
+        </div>
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 text-center flex flex-col justify-center">
+          <div class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-1">Прогноз уровня GER/CEFR</div>
+          <div id="res-cefr-badge" class="text-lg font-bold text-emerald-400 tracking-tight">Оценка...</div>
+          <div id="res-cefr-desc" class="text-xs text-slate-400 mt-1">Описание уровня владения</div>
+        </div>
+      </div>
+
+      <!-- Грамматическая диагностика (5 категорий) -->
+      <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800">
+        <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+          <i data-lucide="layers" class="w-5 h-5 text-sky-400"></i> Диагностика по грамматическим категориям
+        </h3>
+        <p class="text-xs text-slate-400 mb-6">Точность распределена по морфологическим и синтаксическим группам:</p>
+        <div id="res-categories-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Dynamically populated category progress bars -->
+        </div>
+      </div>
+
+      <!-- Сильные стороны & Слабые места -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-panel p-6 rounded-2xl border border-emerald-500/20 bg-emerald-950/10">
+          <h4 class="text-base font-bold text-emerald-400 mb-4 flex items-center gap-2">
+            <i data-lucide="check-check" class="w-5 h-5"></i> Где вы сильны (Stärken)
+          </h4>
+          <div id="res-strengths-container" class="space-y-3">
+            <!-- Strengths -->
+          </div>
+        </div>
+
+        <div class="glass-panel p-6 rounded-2xl border border-rose-500/20 bg-rose-950/10">
+          <h4 class="text-base font-bold text-rose-400 mb-4 flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i> Где у вас слабо (Schwächen)
+          </h4>
+          <div id="res-weaknesses-container" class="space-y-3">
+            <!-- Weaknesses -->
+          </div>
+        </div>
+      </div>
+
+      <!-- План подготовки к следующему разу -->
+      <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800">
+        <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+          <i data-lucide="map" class="w-5 h-5 text-sky-400"></i> Как подготовиться к следующему разу (План действий)
+        </h3>
+        <p class="text-xs text-slate-400 mb-6">Индивидуальные рекомендации и тактика работы со временем:</p>
+        <div id="res-plan-container">
+          <!-- Prep Plan -->
+        </div>
+      </div>
+
+      <!-- ИИ-Интеграция: Готовый промпт для ChatGPT / Claude / Gemini -->
+      <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-sky-500/30 bg-sky-950/10 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h4 class="text-base font-bold text-sky-300 flex items-center gap-2">
+              <i data-lucide="bot" class="w-5 h-5"></i> Промпт для углубленного анализа через ChatGPT / Claude / Gemini
+            </h4>
+            <p class="text-xs text-slate-400 mt-1">
+              Скопируйте этот текст и отправьте в любую нейросеть — она подробно объяснит каждое правило и составит упражнения на ваши ошибки:
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-open-chatgpt" class="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/30 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 transition">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i> В ChatGPT
+            </button>
+            <button id="btn-open-claude" class="px-3 py-1.5 rounded-lg bg-amber-600/20 text-amber-300 hover:bg-amber-600/30 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i> В Claude
+            </button>
+          </div>
+        </div>
+
+        <div class="relative">
+          <textarea id="res-ai-prompt-box" readonly rows="8" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl p-4 text-xs font-mono text-slate-300 focus:outline-none focus:border-sky-500 select-all leading-relaxed"></textarea>
+        </div>
+      </div>
+
+      <!-- Детальный постраничный разбор ошибок (Review) -->
+      <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800">
+        <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+          <i data-lucide="search" class="w-5 h-5 text-sky-400"></i> Детальный разбор ответов по текстам
+        </h3>
+        <p class="text-xs text-slate-400 mb-6">Сравнение ваших ответов с правильными решениями:</p>
+        <div id="res-review-container">
+          <!-- Text by text review tables -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 5: HISTORY                                                    -->
+    <!-- ================================================================= -->
+    <section id="tab-history" class="tab-content hidden space-y-6">
+      <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="history" class="w-5 h-5 text-sky-400"></i> История прохождения тестов
+            </h3>
+            <p class="text-xs text-slate-400">Результаты сохраняются локально в вашем браузере (LocalStorage).</p>
+          </div>
+          <button id="btn-clear-history" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 text-xs font-medium border border-slate-700 transition">
+            Очистить историю
+          </button>
+        </div>
+
+        <div id="history-list-container" class="space-y-3">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-slate-900/40 py-6 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-5xl mx-auto px-4 flex flex-wrap items-center justify-between gap-4">
+      <div>C-Test Deutsch • OnSET, Studienkolleg & TestDaF Simulator</div>
+      <div class="flex items-center gap-4">
+        <span>Статический сайт для GitHub Pages</span>
+        <span>•</span>
+        <a href="https://github.com" target="_blank" class="hover:text-sky-400 transition">GitHub Pages Ready</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/textsData.js"></script>
+  <script src="js/grammarClassifier.js"></script>
+  <script src="js/textSynthesizer.js"></script>
+  <script src="js/cTestGenerator.js"></script>
+  <script src="js/examManager.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/pdfExporter.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
